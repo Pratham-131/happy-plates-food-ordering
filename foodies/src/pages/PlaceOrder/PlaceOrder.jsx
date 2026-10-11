@@ -3,9 +3,10 @@ import "./PlaceOrder.css";
 import { assets } from "../../assets/assets";
 import { StoreContext } from "../../context/StoreContext";
 import { calculateCartTotals } from "../../util/cartUtils";
+import { RAZORPAY_KEY } from "../../util/contants";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { createOrder } from "../../service/orderService";
+import { createOrder, deleteOrder, verifyPayment } from "../../service/orderService";
 import { clearCartItems } from "../../service/cartService";
 
 const PlaceOrder = () => {
@@ -37,26 +38,60 @@ const navigate = useNavigate();
         phoneNumber: data.phoneNumber,
         email: data.email,
         orderedItems: cartItems.map((item) => ({
-          foodId: item.foodId,
+          foodId: item.id,
           quantity: quantities[item.id],
-          price: item.price * quantities[item.id],
-          category: item.category,
-          imageUrl: item.imageUrl,
-          description: item.description,
-          name: item.name,
         })),
-        amount: total,
-        orderStatus: "PLACED",
       };
   
       try {
         const order = await createOrder(orderData, token);
-        if (!order?.id) throw new Error("Order creation failed");
-        toast.success("Order placed. Payment is pending.");
+        if (!order?.id || !order?.razorpayOrderId) throw new Error("Order creation failed");
+        initiateRazorpayPayment(order);
+      } catch (error) {
+        toast.error("Unable to place order. Please try again.");
+      }
+    };
+
+    const initiateRazorpayPayment = (order) => {
+      if (!RAZORPAY_KEY || !window.Razorpay) {
+        toast.error("Payment is not configured. Please try again later.");
+        deleteOrder(order.id, token).catch(() => {});
+        return;
+      }
+
+      const razorpay = new window.Razorpay({
+        key: RAZORPAY_KEY,
+        amount: Math.round(Number(order.amount) * 100),
+        currency: "INR",
+        name: "Happy Plates",
+        description: "Food order payment",
+        order_id: order.razorpayOrderId,
+        handler: verifyPaymentHandler,
+        prefill: {
+          name: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          contact: data.phoneNumber,
+        },
+        theme: { color: "#3399cc" },
+        modal: {
+          ondismiss: () => {
+            deleteOrder(order.id, token).catch(() => {
+              toast.error("Unable to cancel the pending order.");
+            });
+          },
+        },
+      });
+      razorpay.open();
+    };
+
+    const verifyPaymentHandler = async (razorpayResponse) => {
+      try {
+        await verifyPayment(razorpayResponse, token);
+        toast.success("Payment successful.");
         await clearCart();
         navigate("/myorders");
       } catch (error) {
-        toast.error("Unable to place order. Please try again.");
+        toast.error("Payment verification failed. Please contact support.");
       }
     };
   

@@ -5,3 +5,5 @@ aws.access.key=replace-with-your-aws-access-key
 aws.secret.key=replace-with-your-aws-secret-key
 aws.region=replace-with-your-aws-region
 aws.s3.bucketname=replace-with-your-s3-bucket
+razorpay.key.id=replace-with-your-razorpay-test-key-id
+razorpay.key.secret=replace-with-your-razorpay-test-key-secret

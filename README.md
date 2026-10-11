@@ -11,6 +11,7 @@ A food ordering application with a React frontend and Spring Boot API for food l
 - Register and authenticate with JWT.
 - Maintain a user-specific cart.
 - Place orders and view order history.
+- Accept payments through Razorpay Checkout in test mode.
 - Manage food listings and order status with an admin account.
 - Upload food images to AWS S3.
 
@@ -80,14 +81,25 @@ cd Happy-Plates
 
 ### Configure and Run the Backend
 
-Copy the example properties file and set your MongoDB and AWS values:
+Copy the example properties file and set your MongoDB, AWS, and Razorpay test credentials:
 
 ```bash
 cd foodiesapi
 cp src/main/resources/application.properties.example src/main/resources/application.properties
 ```
 
-Configure `jwt.secret.key`, `aws.access.key`, `aws.secret.key`, `aws.region`, and `aws.s3.bucketname` in `src/main/resources/application.properties`. The example MongoDB URI is `mongodb://localhost:27017/happyplates`; the API port is `8080`.
+Set the values in `src/main/resources/application.properties` using your own credentials. Do not commit real secrets.
+
+| Setting | Used by | Value |
+| --- | --- | --- |
+| `spring.data.mongodb.uri` | Backend | MongoDB connection URI |
+| `jwt.secret.key` | Backend | Long random JWT signing secret |
+| `aws.access.key`, `aws.secret.key`, `aws.region`, `aws.s3.bucketname` | Backend | AWS S3 access and bucket |
+| `razorpay.key.id`, `razorpay.key.secret` | Backend | Razorpay test-mode API credentials |
+| `VITE_API_URL` | Frontend `.env` | API base URL, usually `http://localhost:8080/api` |
+| `VITE_RAZORPAY_KEY` | Frontend `.env` | Razorpay test-mode public key ID |
+
+The API port defaults to `8080`. Razorpay key IDs are public; keep the key secret on the backend only.
 
 ```bash
 ./mvnw spring-boot:run
@@ -125,12 +137,12 @@ Paths are relative to the API base URL. `Authenticated` allows a logged-in user;
 | `DELETE` | `/api/cart` | Clear the current user's cart | Authenticated |
 | `GET` | `/api/orders` | List the current user's orders | Authenticated |
 | `POST` | `/api/orders/create` | Place an order | Authenticated |
-| `POST` | `/api/orders/verify` | Payment verification placeholder; responds `501` | Authenticated |
+| `POST` | `/api/orders/verify` | Verify Razorpay payment signature | Authenticated |
 | `DELETE` | `/api/orders/{orderId}` | Delete the current user's order | Authenticated |
 | `GET` | `/api/orders/all` | List all orders | ADMIN |
 | `PATCH` | `/api/orders/status/{orderId}?status=CONFIRMED` | Update order status | ADMIN |
 
-Order statuses are `PLACED`, `CONFIRMED`, `DELIVERED`, and `CANCELLED`. Orders are created with payment status `PENDING` until a payment gateway is integrated.
+Order statuses are `PLACED`, `CONFIRMED`, `DELIVERED`, and `CANCELLED`. Checkout creates a Razorpay order in INR; the backend calculates the amount from MongoDB food prices and changes payment status from `PENDING` to `PAID` only after verifying Razorpay's signature. Use Razorpay test credentials for local testing.
 
 ## Authentication
 
@@ -145,7 +157,6 @@ Registration always creates a `USER` account. Login returns a signed HS256 JWT w
 
 ## Future Improvements
 
-- Integrate and verify a payment gateway.
 - Add role-based dashboards.
 - Add pagination and search.
 

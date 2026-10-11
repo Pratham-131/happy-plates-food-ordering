@@ -11,6 +11,8 @@ public interface OrderService {
 
     List<OrderResponse> getOrdersOfAllUsers();
 
+    void verifyPayment(String razorpayPaymentId, String razorpayOrderId, String razorpaySignature);
+
     void deleteOrder(String orderId);
 
     void updateOrderStatus(String orderId, String status);

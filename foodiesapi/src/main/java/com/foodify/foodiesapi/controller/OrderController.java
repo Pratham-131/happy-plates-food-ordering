@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -32,9 +31,12 @@ public class OrderController {
 
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verifyPayment(@RequestBody Map<String, String> paymentData) {
-        // Payment gateway verification is intentionally unavailable until a gateway is configured.
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-                .body(Map.of("message", "Payment verification is not configured"));
+        orderService.verifyPayment(
+            paymentData.get("razorpay_payment_id"),
+            paymentData.get("razorpay_order_id"),
+            paymentData.get("razorpay_signature")
+        );
+        return ResponseEntity.ok(Map.of("message", "Payment verified"));
     }
 
     @DeleteMapping("/{orderId}")
