@@ -4,14 +4,14 @@ import com.foodify.foodiesapi.io.OrderRequest;
 import com.foodify.foodiesapi.io.OrderResponse;
 
 import java.util.List;
-import java.util.Map;
-
 public interface OrderService {
+    OrderResponse createOrder(OrderRequest request);
 
-    OrderResponse createOrderWithPayment(OrderRequest request)
+    List<OrderResponse> getUserOrders();
 
     List<OrderResponse> getOrdersOfAllUsers();
 
-    void updateOrderStatus(String orderId, String status);
+    void deleteOrder(String orderId);
 
+    void updateOrderStatus(String orderId, String status);
 }

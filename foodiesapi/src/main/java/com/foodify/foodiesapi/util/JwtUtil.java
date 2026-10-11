@@ -3,6 +3,7 @@ package com.foodify.foodiesapi.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import com.foodify.foodiesapi.enums.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,9 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
 
-    public String generateToken(UserDetails userDetails, String role) {
+    public String generateToken(UserDetails userDetails, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
+        claims.put("role", role.name());
         return createToken(claims, userDetails.getUsername());
     }
 

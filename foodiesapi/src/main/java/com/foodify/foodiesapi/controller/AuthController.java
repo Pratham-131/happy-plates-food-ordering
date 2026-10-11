@@ -1,6 +1,7 @@
 package com.foodify.foodiesapi.controller;
 
 import com.foodify.foodiesapi.entity.UserEntity;
+import com.foodify.foodiesapi.enums.UserRole;
 import com.foodify.foodiesapi.io.AuthenticationRequest;
 import com.foodify.foodiesapi.io.AuthenticationResponse;
 import com.foodify.foodiesapi.repository.UserRepository;
@@ -43,10 +44,10 @@ public class AuthController {
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             // Determine role: null or empty = USER, otherwise use the role
-            String userRole = (user.getRole() == null || user.getRole().isEmpty()) ? "USER" : user.getRole();
+            UserRole userRole = user.getRole() == null ? UserRole.USER : user.getRole();
 
             // Only allow users WITHOUT explicit ADMIN role (null role or "USER" role)
-            if ("ADMIN".equals(userRole)) {
+            if (userRole == UserRole.ADMIN) {
                 Map<String, String> error = new HashMap<>();
                 error.put("message", "Access denied. Please use admin login.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
@@ -55,7 +56,7 @@ public class AuthController {
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
             final String jwtToken = jwtUtil.generateToken(userDetails, userRole);
 
-            return ResponseEntity.ok(new AuthenticationResponse(request.getEmail(), jwtToken, userRole));
+            return ResponseEntity.ok(new AuthenticationResponse(request.getEmail(), jwtToken, userRole.name()));
         } catch (BadCredentialsException e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Invalid email or password");
@@ -74,7 +75,7 @@ public class AuthController {
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             // Only allow users with explicit ADMIN role
-            if (!"ADMIN".equals(user.getRole())) {
+            if (user.getRole() != UserRole.ADMIN) {
                 Map<String, String> error = new HashMap<>();
                 error.put("message", "Access denied. Admin privileges required.");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
@@ -83,7 +84,7 @@ public class AuthController {
             final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
             final String jwtToken = jwtUtil.generateToken(userDetails, user.getRole());
 
-            return ResponseEntity.ok(new AuthenticationResponse(request.getEmail(), jwtToken, user.getRole()));
+            return ResponseEntity.ok(new AuthenticationResponse(request.getEmail(), jwtToken, user.getRole().name()));
         } catch (BadCredentialsException e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Invalid email or password");

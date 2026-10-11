@@ -1,6 +1,7 @@
 package com.foodify.foodiesapi.service;
 
 import com.foodify.foodiesapi.entity.UserEntity;
+import com.foodify.foodiesapi.enums.UserRole;
 import com.foodify.foodiesapi.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,14 +26,12 @@ public class AppUserDetailsService implements UserDetailsService {
 
         // If role is null or empty, treat as USER (regular user)
         // Only users with explicit "ADMIN" role are admins
-        String role = (user.getRole() != null && !user.getRole().isEmpty())
-                ? user.getRole()
-                : "USER";
+        UserRole role = user.getRole() == null ? UserRole.USER : user.getRole();
 
         return new User(
                 user.getEmail(),
                 user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()))
         );
     }
 }

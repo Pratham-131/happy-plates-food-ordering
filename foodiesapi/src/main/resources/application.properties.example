@@ -1,0 +1,7 @@
+server.port=8080
+spring.data.mongodb.uri=mongodb://localhost:27017/happyplates
+jwt.secret.key=replace-with-a-long-random-secret
+aws.access.key=replace-with-your-aws-access-key
+aws.secret.key=replace-with-your-aws-secret-key
+aws.region=replace-with-your-aws-region
+aws.s3.bucketname=replace-with-your-s3-bucket

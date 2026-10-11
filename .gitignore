@@ -1,0 +1,6 @@
+.env
+**/.env
+foodiesapi/src/main/resources/application.properties
+foodies/node_modules/
+foodies/dist/
+**/target/

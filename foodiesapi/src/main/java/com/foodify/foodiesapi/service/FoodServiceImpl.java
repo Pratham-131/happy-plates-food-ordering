@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
@@ -43,7 +44,7 @@ public class FoodServiceImpl implements FoodService {
 
             PutObjectRequest putObjectRequest= PutObjectRequest.builder().bucket(bucketName)
                     .key(key)
-                    .acl("public-read") //.acl(ObjectCannedACL.PUBLIC_READ)
+                    .acl(ObjectCannedACL.PUBLIC_READ)
                     .contentType(file.getContentType())
                     .build();
 
