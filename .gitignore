@@ -1,6 +1,15 @@
 .env
+.env.*
+!.env.example
 **/.env
 foodiesapi/src/main/resources/application.properties
+foodiesapi/src/main/resources/application-*.properties
 foodies/node_modules/
 foodies/dist/
 **/target/
+*.log
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
